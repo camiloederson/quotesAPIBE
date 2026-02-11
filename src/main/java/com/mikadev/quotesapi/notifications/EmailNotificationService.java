@@ -25,8 +25,8 @@ public class EmailNotificationService {
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("camilo.ederson@gmail.com");
-        message.setTo("camilo.ederson@gmail.com", "marieturcios1@gmail.com");
-        message.setSubject("English Quote of the Day");
+        message.setTo("camilo.ederson@gmail.com");
+        message.setSubject("English Quote of the` Day");
         String body = quoteEntity.getQuote() + "\n"
                 + quoteEntity.getAuthor().getFirstName().toUpperCase()
                 + " " + (quoteEntity.getAuthor().getSecondName() != null ? quoteEntity.getAuthor().getSecondName().toUpperCase()
@@ -41,7 +41,7 @@ public class EmailNotificationService {
 
         } catch (Exception e) {
             return new EmailResponseDTO(
-                    "Failed", "The email has not been sent" + e.getMessage()
+                    "Failed", "The email has not been sent. " + e.getMessage()
             );
         }
     }
