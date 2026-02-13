@@ -5,6 +5,8 @@ import com.mikadev.quotesapi.DTOs.UserDTO.UserPostDTO;
 import com.mikadev.quotesapi.DTOs.UserDTO.UserPutDTO;
 import com.mikadev.quotesapi.entities.RoleEntity;
 import com.mikadev.quotesapi.entities.UserEntity;
+import com.mikadev.quotesapi.exceptions.ResourceAlreadyExistsException;
+import com.mikadev.quotesapi.exceptions.ResourceNotFoundException;
 import com.mikadev.quotesapi.mappers.UserMapper;
 import com.mikadev.quotesapi.repositories.RoleRepository;
 import com.mikadev.quotesapi.repositories.UserRepository;
@@ -34,19 +36,19 @@ public class UserService {
     public UserGetDTO findUserById(Long id) {
         return userRepository.findById(id)
                 .map(UserMapper::toGetDTO)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
     public UserGetDTO createUser(UserPostDTO userPostDTO) {
 
         RoleEntity roleEntity = roleRepository.findById(userPostDTO.roleId())
-                .orElseThrow(() -> new EntityNotFoundException("Role not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
 
         UserEntity userEntity = UserMapper.toEntity(userPostDTO, roleEntity);
 
         if (userRepository.existsByEmail(userPostDTO.email())
                 || userRepository.existsByUsername(userPostDTO.username())) {
-            throw new RuntimeException("User already exists");
+            throw new ResourceAlreadyExistsException("User already exists");
         }
         UserEntity savedUserEntity = userRepository.save(userEntity);
         return UserMapper.toGetDTO(savedUserEntity);
@@ -54,10 +56,10 @@ public class UserService {
 
     public UserGetDTO updateUser(Long id, UserPutDTO userPutDTO) {
         RoleEntity roleEntity = roleRepository.findById(userPutDTO.roleId())
-                .orElseThrow(() -> new EntityNotFoundException("Role not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
 
         UserEntity userEntity = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         UserEntity savedUserEntity = userRepository.save(UserMapper.updateEntity(userEntity, userPutDTO, roleEntity));
         return UserMapper.toGetDTO(savedUserEntity);
@@ -65,7 +67,7 @@ public class UserService {
 
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new EntityNotFoundException("User not found");
+            throw new ResourceNotFoundException("User not found");
         }
         userRepository.deleteById(id);
     }

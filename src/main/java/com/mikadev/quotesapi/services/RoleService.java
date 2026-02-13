@@ -2,6 +2,8 @@ package com.mikadev.quotesapi.services;
 
 import com.mikadev.quotesapi.DTOs.RoleDTO;
 import com.mikadev.quotesapi.entities.RoleEntity;
+import com.mikadev.quotesapi.exceptions.ResourceAlreadyExistsException;
+import com.mikadev.quotesapi.exceptions.ResourceNotFoundException;
 import com.mikadev.quotesapi.mappers.RoleMapper;
 import com.mikadev.quotesapi.repositories.RoleRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,14 +30,14 @@ public class RoleService {
         return roleRepository.findById(id).
                 map(RoleMapper::toDTO).
                 orElseThrow(
-                        () -> new EntityNotFoundException("Role not found")
+                        () -> new ResourceNotFoundException("Role not found")
                 );
     }
 
     public RoleDTO create(RoleDTO roleDTO) {
         RoleEntity roleEntity = RoleMapper.toEntity(roleDTO);
         if(roleRepository.existsByRoleName(roleDTO.roleName())) {
-            throw new RuntimeException("Role already exists");
+            throw new ResourceAlreadyExistsException("Role already exists");
         }
         RoleEntity roleEntitySaved = roleRepository.save(roleEntity);
         return RoleMapper.toDTO(roleEntitySaved);
@@ -48,13 +50,13 @@ public class RoleService {
                     return RoleMapper.toDTO(roleRepository.save(entity));
                 })
                 .orElseThrow(
-                        () -> new EntityNotFoundException("Role not found")
+                        () -> new ResourceNotFoundException("Role not found")
                 );
     }
 
     public void delete(long id) {
         if (!roleRepository.existsById(id)) {
-            throw new EntityNotFoundException("Role not found");
+            throw new ResourceNotFoundException("Role not found");
         }
         roleRepository.deleteById(id);
     }

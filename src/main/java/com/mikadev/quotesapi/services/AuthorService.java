@@ -2,6 +2,8 @@ package com.mikadev.quotesapi.services;
 
 import com.mikadev.quotesapi.DTOs.AuthorDTO.AuthorGetDTO;
 import com.mikadev.quotesapi.entities.AuthorEntity;
+import com.mikadev.quotesapi.exceptions.ResourceAlreadyExistsException;
+import com.mikadev.quotesapi.exceptions.ResourceNotFoundException;
 import com.mikadev.quotesapi.repositories.AuthorRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -27,13 +29,13 @@ public class AuthorService {
 
     public AuthorGetDTO findById(Long id) {
         AuthorEntity authorEntity = authorRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Author not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
         return AuthorMapper.toGetDTO(authorEntity);
     }
 
     public AuthorGetDTO create(AuthorGetDTO dto) {
         if (authorRepository.existsByFirstNameAndSecondNameAndSurname(dto.firstName(), dto.secondName(), dto.surname())) {
-            throw new RuntimeException("Author already exists");
+            throw new ResourceAlreadyExistsException("Author already exists");
         }
         AuthorEntity authorEntity = new AuthorEntity();
         return AuthorMapper.toGetDTO(authorRepository.save(authorEntity));
@@ -41,13 +43,13 @@ public class AuthorService {
 
     public AuthorGetDTO update(Long id, AuthorGetDTO dto) {
         AuthorEntity authorToUpdate = authorRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Author not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
         return AuthorMapper.toGetDTO(authorRepository.save(authorToUpdate));
     }
 
     public void delete(Long id) {
         if (!authorRepository.existsById(id)) {
-            throw new EntityNotFoundException("Author not found");
+            throw new ResourceNotFoundException("Author not found");
         }
         authorRepository.deleteById(id);
     }

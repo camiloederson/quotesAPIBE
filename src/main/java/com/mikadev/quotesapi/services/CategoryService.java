@@ -4,6 +4,8 @@ import com.mikadev.quotesapi.DTOs.CategoryDTO.CategoryGetDTO;
 import com.mikadev.quotesapi.DTOs.CategoryDTO.CategoryPostDTO;
 import com.mikadev.quotesapi.DTOs.CategoryDTO.CategoryPutDTO;
 import com.mikadev.quotesapi.entities.CategoryEntity;
+import com.mikadev.quotesapi.exceptions.ResourceAlreadyExistsException;
+import com.mikadev.quotesapi.exceptions.ResourceNotFoundException;
 import com.mikadev.quotesapi.mappers.CategoryMapper;
 import com.mikadev.quotesapi.repositories.CategoryRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,13 +31,13 @@ public class CategoryService {
 
     public CategoryGetDTO findById(Long id) {
         CategoryEntity categoryEntity = categoryRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         return CategoryMapper.toCategoryGetDTO(categoryEntity);
     }
 
     public CategoryGetDTO createCategory(CategoryPostDTO categoryDTO) {
         if (categoryRepository.existsByName(categoryDTO.name())) {
-            throw new RuntimeException("Category name already exists");
+            throw new ResourceAlreadyExistsException("Category name already exists");
         }
         CategoryEntity categorySaved = categoryRepository.save(CategoryMapper.toCategoryEntity(categoryDTO));
         return CategoryMapper.toCategoryGetDTO(categorySaved);
@@ -43,14 +45,14 @@ public class CategoryService {
 
     public CategoryGetDTO updateCategory(Long id, CategoryPutDTO categoryDTO) {
         CategoryEntity categoryToUpdate = categoryRepository.findById(id).
-                orElseThrow(() -> new EntityNotFoundException("Category not found"));
+                orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         CategoryEntity categoryUpdated = categoryRepository.save(CategoryMapper.toUpdateCategoryEntity(categoryDTO));
         return CategoryMapper.toCategoryGetDTO(categoryUpdated);
     }
 
     public void deleteCategory(Long id) {
         if (!categoryRepository.existsById(id)) {
-            throw new EntityNotFoundException("Category not found");
+            throw new ResourceNotFoundException("Category not found");
         }
         categoryRepository.deleteById(id);
     }

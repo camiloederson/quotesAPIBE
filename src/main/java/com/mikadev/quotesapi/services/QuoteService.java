@@ -6,6 +6,7 @@ import com.mikadev.quotesapi.DTOs.QuoteDTO.QuotePutDTO;
 import com.mikadev.quotesapi.entities.AuthorEntity;
 import com.mikadev.quotesapi.entities.CategoryEntity;
 import com.mikadev.quotesapi.entities.QuoteEntity;
+import com.mikadev.quotesapi.exceptions.ResourceNotFoundException;
 import com.mikadev.quotesapi.mappers.QuoteMapper;
 import com.mikadev.quotesapi.repositories.AuthorRepository;
 import com.mikadev.quotesapi.repositories.CategoryRepository;
@@ -39,15 +40,15 @@ public class QuoteService {
 
     public QuoteGetDTO findById(Long id) {
         QuoteEntity quoteEntity = quoteRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Quote not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Quote not found"));
         return QuoteMapper.toGetDTO(quoteEntity);
     }
 
     public QuoteGetDTO create(QuotePostDTO dto) {
         AuthorEntity author = authorRepository.findById(dto.authorId())
-                .orElseThrow(() -> new EntityNotFoundException("Author not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
         CategoryEntity category = categoryRepository.findById(dto.categoryId())
-                .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         QuoteEntity quoteEntity = QuoteMapper.toQuoteEntity(dto, author, category);
         return QuoteMapper.toGetDTO(quoteRepository.save(quoteEntity));
@@ -55,12 +56,12 @@ public class QuoteService {
 
     public QuoteGetDTO update(Long id, QuotePutDTO dto) {
         QuoteEntity quoteToUpdate = quoteRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Quote not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Quote not found"));
 
         AuthorEntity author = authorRepository.findById(dto.authorId())
-                .orElseThrow(() -> new EntityNotFoundException("Author not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
         CategoryEntity category = categoryRepository.findById(dto.categoryId())
-                .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         QuoteMapper.updateQuoteEntity(quoteToUpdate, dto, author, category);
         return QuoteMapper.toGetDTO(quoteRepository.save(quoteToUpdate));
@@ -68,7 +69,7 @@ public class QuoteService {
 
     public void delete(Long id) {
         if (!quoteRepository.existsById(id)) {
-            throw new EntityNotFoundException("Quote not found");
+            throw new ResourceNotFoundException("Quote not found");
         }
         quoteRepository.deleteById(id);
     }
