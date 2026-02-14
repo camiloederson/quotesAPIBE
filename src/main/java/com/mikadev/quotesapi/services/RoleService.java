@@ -7,6 +7,9 @@ import com.mikadev.quotesapi.exceptions.ResourceNotFoundException;
 import com.mikadev.quotesapi.mappers.RoleMapper;
 import com.mikadev.quotesapi.repositories.RoleRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,10 +23,15 @@ public class RoleService {
         this.roleRepository = roleRepository;
     }
 
-    public List<RoleDTO> findAll() {
-        return roleRepository.findAll().stream().
-                map(RoleMapper::toDTO).
-                toList();
+    public Page<RoleDTO> findAll(Pageable pageable) {
+        int maxSize = 20;
+        int page = Math.max(pageable.getPageNumber(), 0);
+        int size = Math.max(pageable.getPageSize(), maxSize);
+
+        Pageable validatedPageable = PageRequest.of(page, size);
+
+        return roleRepository.findAll(validatedPageable).
+                map(RoleMapper::toDTO);
     }
 
     public RoleDTO findById(Long id) {
@@ -36,7 +44,7 @@ public class RoleService {
 
     public RoleDTO create(RoleDTO roleDTO) {
         RoleEntity roleEntity = RoleMapper.toEntity(roleDTO);
-        if(roleRepository.existsByRoleName(roleDTO.roleName())) {
+        if (roleRepository.existsByRoleName(roleDTO.roleName())) {
             throw new ResourceAlreadyExistsException("Role already exists");
         }
         RoleEntity roleEntitySaved = roleRepository.save(roleEntity);

@@ -3,6 +3,9 @@ package com.mikadev.quotesapi.controllers;
 import com.mikadev.quotesapi.DTOs.RoleDTO;
 import com.mikadev.quotesapi.services.RoleService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +13,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/quotes/v1/api/roles")
+@RequestMapping("/quotes/api/v1/roles")
 public class RoleController {
 
     private final RoleService roleService;
@@ -20,9 +23,12 @@ public class RoleController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RoleDTO>> getRoles() {
-        List<RoleDTO> roleEntityList = roleService.findAll();
-        return ResponseEntity.ok(roleEntityList);
+    public ResponseEntity<Page<RoleDTO>> getRoles(
+            @RequestParam int page, @RequestParam int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<RoleDTO> roleEntityPage = roleService.findAll(pageable);
+        return ResponseEntity.ok(roleEntityPage);
     }
 
     @GetMapping("/{id}")
